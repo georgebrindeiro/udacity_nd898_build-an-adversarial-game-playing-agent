@@ -1,3 +1,8 @@
+import logging
+import pickle
+import random
+
+logger = logging.getLogger(__name__)
 
 from sample_players import DataPlayer
 
@@ -30,17 +35,64 @@ class CustomPlayer(DataPlayer):
         See RandomPlayer and GreedyPlayer in sample_players for more examples.
 
         **********************************************************************
-        NOTE: 
+        NOTE:
         - The caller is responsible for cutting off search, so calling
           get_action() from your own code will create an infinite loop!
           Refer to (and use!) the Isolation.play() function to run games.
         **********************************************************************
         """
-        # TODO: Replace the example implementation below with your own search
-        #       method by combining techniques from lecture
-        #
-        # EXAMPLE: choose a random move without any search--this function MUST
-        #          call self.queue.put(ACTION) at least once before time expires
-        #          (the timer is automatically managed for you)
-        import random
-        self.queue.put(random.choice(state.actions()))
+        # randomly select a move as player 1 or 2 on an empty board, otherwise
+        # return the optimal minimax move using iterative deepening
+        if state.ply_count < 2:
+            self.queue.put(random.choice(state.actions()))
+        else:
+            d = 1
+            while(True):
+                self.queue.put(self.alpha_beta_search(state, depth=d))
+                d += 1
+
+    def alpha_beta_search(self, state, depth):
+
+        def min_value(state, alpha, beta, depth):
+            if state.terminal_test(): return state.utility(self.player_id)
+            if depth <= 0: return self.score(state)
+            value = float("inf")
+            for action in state.actions():
+                value = min(value, max_value(state.result(action), alpha, beta, depth - 1))
+                if value <= alpha:
+                    return value
+                else:
+                    beta = min(beta, value)
+            return value
+
+        def max_value(state, alpha, beta, depth):
+            if state.terminal_test(): return state.utility(self.player_id)
+            if depth <= 0: return self.score(state)
+            value = float("-inf")
+            for action in state.actions():
+                value = max(value, min_value(state.result(action), alpha, beta, depth - 1))
+                if value >= beta:
+                    return value
+                else:
+                    alpha = max(alpha, value)
+            return value
+
+        alpha = float("-inf")
+        beta = float("+inf")
+        best_score = float("-inf")
+        best_move = None
+
+        for a in state.actions():
+            v = min_value(state.result(a), alpha, beta, depth - 1)
+            alpha = max(alpha, v)
+            if v > best_score:
+                best_score = v
+                best_move = a
+        return best_move
+
+    def score(self, state):
+        own_loc = state.locs[self.player_id]
+        opp_loc = state.locs[1 - self.player_id]
+        own_liberties = state.liberties(own_loc)
+        opp_liberties = state.liberties(opp_loc)
+        return len(own_liberties) - len(opp_liberties)
