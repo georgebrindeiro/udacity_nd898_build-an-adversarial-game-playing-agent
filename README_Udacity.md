@@ -46,7 +46,7 @@ You must implement an agent in the `CustomPlayer` class defined in the `game_age
 **NOTE:** Your agent will **not** be evaluated in an environment suitable for running machine learning or deep learning agents (like AlphaGo); visit an office hours sessions **after** completing the project if you would like guidance on incorporating machine learning in your agent.
 
 #### The get_action() Method
-This function is called once per turn for each player. The calling function handles the time limit and 
+This function is called once per turn for each player. The calling function handles the time limit and
 ```
 def get_action(self, state):
     import random
@@ -78,12 +78,12 @@ Select at least one of the following to implement and evaluate in your report. (
 
 - Create a performance baseline using `run_search.py` (with the `fair_matches` flag enabled) to evaluate the effectiveness of your agent using the #my_moves - #opponent_moves heuristic from lecture
 - Use the same process to evaluate the effectiveness of your agent using your own custom heuristic
-    
+
 **Hints:**
 - Research other games (chess, go, connect4, etc.) to get ideas for developing good heuristics
 - If the results of your tests are very close, try increasing the number of matches (e.g., >100) to increase your confidence in the results
 - Experiment with adding more search time--does adding time confer any advantage to your agent over the baseline?
-- Augment the code to count the nubmer of nodes your agent searches--is it better to search more or fewer nodes? How does your heuristic compare to the baseline heuristic you chose?
+- Augment the code to count the number of nodes your agent searches--is it better to search more or fewer nodes? How does your heuristic compare to the baseline heuristic you chose?
 
 
 ### Option 2: Develop an opening book (must span at least depth 4 of the search tree)
@@ -115,7 +115,7 @@ with open("data.pickle", 'wb') as f:
 - Create a performance baseline using `run_search.py` to evaluate the effectiveness of a baseline agent (e.g., an agent using your minimax or alpha-beta search code from the classroom)
 - Use `run_search.py` to evaluate the effectiveness of your agent using your own custom search techniques
 - You must decide whether to test with or without "fair" matches enabled--justify your choice in your report
-    
+
 **Hints:**
 - If the results are very close, try increasing the number of matches (e.g., >100) to increase your confidence in the results
 - Experiment with adding more search time--does adding time confer any advantage to your agent?

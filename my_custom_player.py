@@ -1,13 +1,14 @@
 import logging
 import pickle
 import random
+import itertools
 
 logger = logging.getLogger(__name__)
 
-from sample_players import DataPlayer
+from sample_players import BasePlayer
 
 
-class CustomPlayer(DataPlayer):
+class BaselinePlayer(BasePlayer):
     """ Implement your own agent to play knight's Isolation
 
     The get_action() method is the only required method for this project.
@@ -43,11 +44,14 @@ class CustomPlayer(DataPlayer):
         """
         # randomly select a move as player 1 or 2 on an empty board, otherwise
         # return the optimal minimax move using iterative deepening
+        print(self.__class__.__name__)
+
         if state.ply_count < 2:
             self.queue.put(random.choice(state.actions()))
         else:
             d = 1
             while(True):
+                print(d)
                 self.queue.put(self.alpha_beta_search(state, depth=d))
                 d += 1
 
@@ -96,3 +100,39 @@ class CustomPlayer(DataPlayer):
         own_liberties = state.liberties(own_loc)
         opp_liberties = state.liberties(opp_loc)
         return len(own_liberties) - len(opp_liberties)
+
+class HeuristicPlayer1(BaselinePlayer):
+    def score(self, state):
+        depth = state.ply_count
+        own_loc = state.locs[self.player_id]
+        opp_loc = state.locs[1 - self.player_id]
+        own_liberties = state.liberties(own_loc)
+        opp_liberties = state.liberties(opp_loc)
+        return len(own_liberties)
+
+class HeuristicPlayer2(BaselinePlayer):
+    def score(self, state):
+        depth = state.ply_count
+        own_loc = state.locs[self.player_id]
+        opp_loc = state.locs[1 - self.player_id]
+        own_liberties = state.liberties(own_loc)
+        opp_liberties = state.liberties(opp_loc)
+        return len(own_liberties) - 3*len(opp_liberties)
+
+class HeuristicPlayer3(BaselinePlayer):
+    def score(self, state):
+        depth = state.ply_count
+        own_loc = state.locs[self.player_id]
+        opp_loc = state.locs[1 - self.player_id]
+        own_liberties = state.liberties(own_loc)
+        opp_liberties = state.liberties(opp_loc)
+        return len(own_liberties) - depth*len(opp_liberties)
+
+class HeuristicPlayer4(BaselinePlayer):
+    def score(self, state):
+        depth = state.ply_count
+        own_loc = state.locs[self.player_id]
+        opp_loc = state.locs[1 - self.player_id]
+        own_liberties = state.liberties(own_loc)
+        opp_liberties = state.liberties(opp_loc)
+        return len(own_liberties) - max(1,4-depth)*len(opp_liberties)

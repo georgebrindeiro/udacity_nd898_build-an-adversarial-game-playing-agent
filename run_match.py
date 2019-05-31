@@ -13,7 +13,12 @@ from multiprocessing.pool import ThreadPool as Pool
 
 from isolation import Isolation, Agent, play
 from sample_players import RandomPlayer, GreedyPlayer, MinimaxPlayer
-from my_custom_player import CustomPlayer
+#from my_custom_player import CustomPlayer
+from my_custom_player import BaselinePlayer
+from my_custom_player import HeuristicPlayer1
+from my_custom_player import HeuristicPlayer2
+from my_custom_player import HeuristicPlayer3
+from my_custom_player import HeuristicPlayer4
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +26,28 @@ NUM_PROCS = 1
 NUM_ROUNDS = 5  # number times to replicate the match; increase for higher confidence estimate
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
-TEST_AGENTS = {
-    "RANDOM": Agent(RandomPlayer, "Random Agent"),
-    "GREEDY": Agent(GreedyPlayer, "Greedy Agent"),
-    "MINIMAX": Agent(MinimaxPlayer, "Minimax Agent"),
-    "SELF": Agent(CustomPlayer, "Custom TestAgent")
+TEST_AGENTS_1 = {
+    "RANDOM": Agent(RandomPlayer, "Random Player 1"),
+    "GREEDY": Agent(GreedyPlayer, "Greedy Player 1"),
+    "MINIMAX": Agent(MinimaxPlayer, "Minimax Player 1"),
+    #"SELF": Agent(CustomPlayer, "Custom TestAgent")
+    "BASELINE": Agent(BaselinePlayer, "Baseline Player 1"),
+    "H1": Agent(HeuristicPlayer1, "Heuristic #1 Player 1"),
+    "H2": Agent(HeuristicPlayer2, "Heuristic #2 Player 1"),
+    "H3": Agent(HeuristicPlayer3, "Heuristic #3 Player 1"),
+    "H4": Agent(HeuristicPlayer4, "Heuristic #4 Player 1")
+}
+
+TEST_AGENTS_2 = {
+    "RANDOM": Agent(RandomPlayer, "Random Player 2"),
+    "GREEDY": Agent(GreedyPlayer, "Greedy Player 2"),
+    "MINIMAX": Agent(MinimaxPlayer, "Minimax Player 2"),
+    #"SELF": Agent(CustomPlayer, "Custom TestAgent")
+    "BASELINE": Agent(BaselinePlayer, "Baseline Player 2"),
+    "H1": Agent(HeuristicPlayer1, "Heuristic #1 Player 2"),
+    "H2": Agent(HeuristicPlayer2, "Heuristic #2 Player 2"),
+    "H3": Agent(HeuristicPlayer3, "Heuristic #3 Player 2"),
+    "H4": Agent(HeuristicPlayer4, "Heuristic #4 Player 2")
 }
 
 Match = namedtuple("Match", "players initial_state time_limit match_id debug_flag")
@@ -104,14 +126,14 @@ def play_matches(custom_agent, test_agent, cli_args):
 
 
 def main(args):
-    test_agent = TEST_AGENTS[args.opponent.upper()]
-    custom_agent = Agent(CustomPlayer, "Custom Agent")
+    custom_agent = TEST_AGENTS_1[args.custom_agent.upper()]
+    test_agent = TEST_AGENTS_2[args.opponent.upper()]
     wins, num_games = play_matches(custom_agent, test_agent, args)
 
-    logger.info("Your agent won {:.1f}% of matches against {}".format(
-       100. * wins / num_games, test_agent.name))
-    print("Your agent won {:.1f}% of matches against {}".format(
-       100. * wins / num_games, test_agent.name))
+    logger.info("Your agent ({}) won {:.1f}% of matches against the opponent ({})".format(
+       custom_agent.name, 100. * wins / num_games, test_agent.name))
+    print("Your agent ({}) won {:.1f}% of matches against the opponent ({})".format(
+       custom_agent.name, 100. * wins / num_games, test_agent.name))
     print()
 
 
@@ -123,7 +145,7 @@ if __name__ == "__main__":
             Example Usage:
             --------------
             - Run 40 games (10 rounds = 20 games x2 for fair matches = 40 games) against
-              the greedy agent with 4 parallel processes: 
+              the greedy agent with 4 parallel processes:
 
                 $python run_match.py -f -r 10 -o GREEDY -p 4
 
@@ -144,35 +166,42 @@ if __name__ == "__main__":
     parser.add_argument(
         '-f', '--fair_matches', action="store_true",
         help="""\
-            Run 'fair' matches to mitigate differences caused by opening position 
-            (useful for analyzing heuristic performance).  Setting this flag doubles 
+            Run 'fair' matches to mitigate differences caused by opening position
+            (useful for analyzing heuristic performance).  Setting this flag doubles
             the number of rounds your agent will play.  (See README for details.)
         """
     )
     parser.add_argument(
         '-r', '--rounds', type=int, default=NUM_ROUNDS,
         help="""\
-            Choose the number of rounds to play. Each round consists of two matches 
-            so that each player has a turn as first player and one as second player.  
-            This helps mitigate performance differences caused by advantages for either 
-            player getting first initiative.  (Hint: this value is very low by default 
-            for rapid iteration, but it should be increased significantly--to 50-100 
+            Choose the number of rounds to play. Each round consists of two matches
+            so that each player has a turn as first player and one as second player.
+            This helps mitigate performance differences caused by advantages for either
+            player getting first initiative.  (Hint: this value is very low by default
+            for rapid iteration, but it should be increased significantly--to 50-100
             or more--in order to increase the confidence in your results.
         """
     )
     parser.add_argument(
-        '-o', '--opponent', type=str, default='MINIMAX', choices=list(TEST_AGENTS.keys()),
+        '-p1', '--custom_agent', type=str, default='BASELINE', choices=list(TEST_AGENTS_1.keys()),
         help="""\
-            Choose an agent for testing. The random and greedy agents may be useful 
+            Choose an agent for testing (you). The random and greedy agents may be useful
+            for initial testing because they run more quickly than the minimax agent.
+        """
+    )
+    parser.add_argument(
+        '-p2', '--opponent', type=str, default='MINIMAX', choices=list(TEST_AGENTS_2.keys()),
+        help="""\
+            Choose an agent for testing (opponent). The random and greedy agents may be useful
             for initial testing because they run more quickly than the minimax agent.
         """
     )
     parser.add_argument(
         '-p', '--processes', type=int, default=NUM_PROCS,
         help="""\
-            Set the number of parallel processes to use for running matches.  WARNING: 
-            Windows users may see inconsistent performance using >1 thread.  Check the 
-            log file for time out errors and increase the time limit (add 50-100ms) if 
+            Set the number of parallel processes to use for running matches.  WARNING:
+            Windows users may see inconsistent performance using >1 thread.  Check the
+            log file for time out errors and increase the time limit (add 50-100ms) if
             your agent performs poorly.
         """
     )
