@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 from sample_players import BasePlayer
 
-
 class BaselinePlayer(BasePlayer):
     """ Implement your own agent to play knight's Isolation
 
@@ -44,14 +43,14 @@ class BaselinePlayer(BasePlayer):
         """
         # randomly select a move as player 1 or 2 on an empty board, otherwise
         # return the optimal minimax move using iterative deepening
-        print(self.__class__.__name__)
+        #print(self.__class__.__name__)
 
         if state.ply_count < 2:
             self.queue.put(random.choice(state.actions()))
         else:
             d = 1
             while(True):
-                print(d)
+                #print(d)
                 self.queue.put(self.alpha_beta_search(state, depth=d))
                 d += 1
 
@@ -136,3 +135,9 @@ class HeuristicPlayer4(BaselinePlayer):
         own_liberties = state.liberties(own_loc)
         opp_liberties = state.liberties(opp_loc)
         return len(own_liberties) - max(1,4-depth)*len(opp_liberties)
+
+class CustomPlayer(HeuristicPlayer1):
+    # Created this class just to align with udacity submit expectations
+    # Switch base class to change customplayer behavior
+    # name is just a dummy variable to make sure inheritance works
+    name = "Custom Player"
